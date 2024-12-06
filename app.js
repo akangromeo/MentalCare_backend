@@ -16,7 +16,7 @@ app.use("/api/test", dass42Routes);
 app.use("/api/results", resultRoutes);
 app.use("/api/user", userRoutes);
 
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Connected!");
 });
 
