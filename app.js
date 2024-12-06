@@ -6,7 +6,6 @@ const dass42Routes = require("./routes/dass42Routes");
 const resultRoutes = require("./routes/resultRoutes");
 const authenticate = require("./middleware/authenticate");
 const userRoutes = require("./routes/userRoutes");
-
 const app = express();
 app.use(express.json());
 
@@ -16,6 +15,10 @@ app.use("/api", profileRoutes);
 app.use("/api/test", dass42Routes);
 app.use("/api/results", resultRoutes);
 app.use("/api/user", userRoutes);
+
+app.use("/", (req, res) => {
+  res.send("Connected!");
+});
 
 // Pastikan untuk menggunakan port yang sudah diatur di file .env atau default 3000
 sequelize
