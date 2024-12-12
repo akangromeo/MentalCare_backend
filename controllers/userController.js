@@ -164,7 +164,9 @@ exports.updateUserStatus = async (req, res) => {
 
 exports.getRoles = async (req, res) => {
   try {
-    const Roleslist = await Role.findAll();
+    const Roleslist = await Role.findAll({
+      order: "DESC",
+    });
 
     const RoleData = Roleslist.map((role) => {
       return {
