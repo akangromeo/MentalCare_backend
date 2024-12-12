@@ -5,7 +5,6 @@ const userController = require("../controllers/userController");
 const authenticate = require("../middleware/authenticate"); // Middleware untuk autentikasi
 
 // Update psikolog yang dipilih oleh pasien
-router.put("/update-psikolog", authenticate, userController.choosePsikolog);
 
 router.get("/get-all-patients", authenticate, userController.getAllPasien);
 
