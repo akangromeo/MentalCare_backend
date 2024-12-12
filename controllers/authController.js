@@ -73,7 +73,7 @@ exports.login = async (req, res) => {
 
     // Membuat JWT dengan payload berisi user_id
     const token = jwt.sign(
-      { user_id: user.user_id, email: user.email, role_id: user.role_id , profile_id: user.profile_id},
+      { user_id: user.user_id, email: user.email, role_id: user.role_id},
       process.env.JWT_SECRET
     );
 
@@ -85,7 +85,6 @@ exports.login = async (req, res) => {
         id: user.user_id,
         email: user.email,
         role_id: user.role_id,
-        profile_id: user.profile_id
       },
     });
   } catch (error) {
