@@ -93,41 +93,9 @@ exports.getAllPsikolog = async (req, res) => {
   }
 };
 
-// Fungsi untuk memperbarui psikolog yang dipilih oleh pasien
-exports.choosePsikolog = async (req, res) => {
-  try {
-    const user_id = req.user.user_id; // Mengambil user_id dari JWT token
-    const { psikolog_id } = req.body; // Mengambil psikolog_id dari body request
 
-    // Cari pengguna berdasarkan user_id
-    const user = await User.findByPk(user_id);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
 
-    // Pastikan hanya pengguna dengan role 'user' yang bisa memilih psikolog
-    if (user.role_id !== 3) {
-      // Role 3 berarti pasien (user)
-      return res
-        .status(403)
-        .json({ message: "Only patients can select a psychologist" });
-    }
-
-    const psikolog = await user.findByPk(psikolog_id);
-    if (!psikolog || psikolog.role_id !== 2 || psikolog.status !== "approved")
-      // Update psikolog_id pada profil pengguna
-      user.psikolog_id = psikolog_id || user.psikolog_id; // Update jika psikolog_id baru diberikan
-
-    // Simpan perubahan
-    await user.save();
-
-    res.json({ message: "Psikolog updated successfully", user });
-  } catch (error) {
-    console.error("Error updating psikolog:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
 
 exports.updateUserStatus = async (req, res) => {
   try {
