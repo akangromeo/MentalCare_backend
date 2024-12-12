@@ -161,3 +161,27 @@ exports.updateUserStatus = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getRoles = async (req, res) => {
+  try {
+    const Roleslist = await Role.findAll({
+      include: [
+        {
+          model: Role,
+        },
+      ],
+    });
+
+    const RoleData = Roleslist.map((role) => {
+      return {
+        role_id: role.role_id,
+        role_name: role.role_name,
+      };
+    });
+
+    res.json(RoleData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
