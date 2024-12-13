@@ -28,7 +28,7 @@ exports.getProfile = async (req, res) => {
 
 // Fungsi untuk memperbarui profil pengguna
 exports.updateProfile = async (req, res) => {
-  const userId = req.user.user_id; // Ambil user_id dari JWT
+  const userId = req.user.user_id; 
   const {
     name,
     birth_date,
