@@ -76,6 +76,32 @@ exports.updateQuestion = async (req, res) => {
 	}
 };
 
+exports.softDeleteQuestion = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Mencari pertanyaan berdasarkan ID
+		const question = await Dass42Question.findByPk(id);
+
+		// Jika pertanyaan tidak ditemukan
+		if (!question) {
+			return res.status(404).json({ error: "Pertanyaan tidak ditemukan" });
+		}
+
+		// Update kolom is_deleted menjadi true
+		question.is_deleted = true;
+
+		// Simpan perubahan ke database
+		await question.save();
+
+		// Mengembalikan respons sukses
+		res.json({ message: "Pertanyaan berhasil dihapus" });
+	} catch (error) {
+		// Menangani kesalahan
+		res.status(500).json({ error: error.message });
+	}
+};
+
 // Mengumpulkan jawaban dan menyimpan hasil tes
 exports.submitTest = async (req, res) => {
   const { responses, psikolog_id } = req.body;
