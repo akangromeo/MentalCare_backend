@@ -112,21 +112,19 @@ exports.getResultByPsikologId = async (req, res) => {
       where: { psikolog_id },
       include: [
         {
-          model: Dass42Response,
+          model: User, // Join ke tabel Users
+          as: "patient_user", // Alias untuk join ke User
+          attributes: ["user_id"], // Ambil user_id untuk koneksi ke Profiles
           include: [
             {
-              model: Dass42Question, // Mengambil pertanyaan DASS42
-              include: [Category], // Mengambil kategori dari setiap pertanyaan
+              model: Profile, // Join ke tabel Profiles
+              as: "profile", // Alias untuk join ke Profile
+              attributes: ["name", "birth_date","phone"], // Atribut profil
             },
           ],
         },
-        {
-          model: Profile, // Menambahkan join ke tabel Profile
-          as: "patient_profile", // Alias untuk relasi profil pasien
-          attributes: ["name", "phone",], // Atribut yang ingin diambil
-        },
       ],
-      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes diambil
+      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes
     });
 
     if (!results || results.length === 0) {
@@ -136,8 +134,9 @@ exports.getResultByPsikologId = async (req, res) => {
       });
     }
 
-    // Menyusun response untuk hasil tes beserta profil pasien
+    // Menyusun response
     const resultData = results.map((result) => {
+      const profile = result.patient_user?.profile; // Ambil profile dari relasi User
       return {
         result_id: result.result_id,
         patient_id: result.patient_id,
@@ -146,9 +145,12 @@ exports.getResultByPsikologId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
-        name: result.patient_profile ? result.patient_profile.name : null,
-        
-        phone: result.patient_profile ? result.patient_profile.phone : null, // Jika profil tidak ditemukan
+        // Data profil
+        name: profile ? profile.name : null,
+        birth_date: profile ? profile.birth_date : null,
+       
+        phone: profile ? profile.phone : null,
+
       };
     });
 
