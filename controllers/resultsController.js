@@ -108,24 +108,23 @@ exports.getResultByPsikologId = async (req, res) => {
   const psikolog_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
 
   try {
-    // Mencari hasil tes berdasarkan psikolog_id
+    // Query hasil tes berdasarkan psikolog_id
     const results = await Dass42Result.findAll({
       where: { psikolog_id },
       include: [
         {
           model: User, // Join ke tabel Users
-          as: "patient_user", // Alias untuk join ke User
-          attributes: ["user_id"], // Ambil user_id untuk koneksi ke Profiles
+          as: "patient", // Alias relasi pasien
+          attributes: ["user_id"], // Ambil user_id dari tabel Users
           include: [
             {
-              model: Profile, // Join ke tabel Profiles
-              as: "profile", // Alias untuk join ke Profile
-              attributes: ["name", "birth_date","phone"], // Atribut profil
+              model: Profile, // Join ke tabel Profiles melalui user_id
+              attributes: ["name", "birth_date",  "phone"],
             },
           ],
         },
       ],
-      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes
+      order: [["date_taken", "DESC"]], // Urutkan berdasarkan tanggal tes
     });
 
     if (!results || results.length === 0) {
@@ -137,7 +136,7 @@ exports.getResultByPsikologId = async (req, res) => {
 
     // Menyusun response
     const resultData = results.map((result) => {
-      const profile = result.patient_user?.profile; // Ambil profile dari relasi User
+      const profile = result.patient?.Profile; // Ambil profil dari relasi
       return {
         result_id: result.result_id,
         patient_id: result.patient_id,
@@ -146,12 +145,12 @@ exports.getResultByPsikologId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
-        // Data profil
+        // Data profil pasien
         name: profile ? profile.name : null,
         birth_date: profile ? profile.birth_date : null,
-       
+        
         phone: profile ? profile.phone : null,
-
+       
       };
     });
 
