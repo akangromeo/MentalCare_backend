@@ -22,7 +22,7 @@ router.post("/submit", authenticate, dass42Controller.submitTest);
 // Mendapatkan hasil tes berdasarkan patient_id
 router.get("/result", authenticate, dass42Controller.getResultByPatientId);
 
-router.get("/result-psikolog", authenticate, dass42Controller.getResultByPatientId);
+router.get("/result-psikolog", authenticate, dass42Controller.getResultByPsikologId);
 
 // Mendapatkan hasil tes berdasarkan result_id
 router.get("/result/:result_id", authenticate, dass42Controller.getResultById);
