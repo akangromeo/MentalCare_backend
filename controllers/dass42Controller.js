@@ -290,7 +290,7 @@ exports.getResultByPatientId = async (req, res) => {
 exports.getResultByPsikologId = async (req, res) => {
   const psikolog_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
 
-  console.log("psikolog_id dari JWT:", psikolog_id);
+ 
 
   try {
     // Mencari hasil tes berdasarkan psikolog_id
@@ -311,7 +311,7 @@ exports.getResultByPsikologId = async (req, res) => {
     });
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "No test results found for this psikolog_id" });
+      return res.status(404).json({ message: "No test results found for this psikolog_id" , psikolog_id});
     }
 
     // Menyusun response untuk hasil tes
