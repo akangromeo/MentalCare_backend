@@ -2,8 +2,7 @@ const db = require("../models");
 const User = db.User;
 const Gender = db.Gender;
 const Profile = require('../models/Profile');
-const uploadToCloudinary = require('../utils/uploadToCloudinary');
-const { upload } = require('../middleware/upload');
+const upload = require('../config/multerCloudinary'); 
 
 // Fungsi untuk mengambil profil pengguna
 exports.getProfile = async (req, res) => {
@@ -175,18 +174,15 @@ exports.updateGender = async (req, res) => {
 
 // Fungsi untuk memperbarui gambar profil
 exports.updateProfilePicture = [
-  upload.single('profile_picture'), // Middleware untuk menangani upload file
+  upload.single('profile_picture'), // Middleware Multer untuk menangani file upload
   async (req, res) => {
-    const userId = req.user.user_id;
+    const userId = req.user.user_id; // Mendapatkan user ID dari JWT
 
     if (!req.file) {
       return res.status(400).json({ message: "Gambar profil tidak boleh kosong." });
     }
 
     try {
-      // Mengunggah gambar ke Cloudinary
-      const result = await uploadToCloudinary(req.file);
-
       // Cari profil berdasarkan user_id
       const profile = await Profile.findOne({ where: { user_id: userId } });
 
@@ -194,32 +190,34 @@ exports.updateProfilePicture = [
         return res.status(404).json({ message: "Profil tidak ditemukan." });
       }
 
-      // Menyimpan URL gambar yang diunggah ke Cloudinary
-      profile.profile_picture_url = result.secure_url;  // Gambar berhasil diupload
+      // Simpan URL gambar ke dalam kolom `profile_picture_url`
+      profile.profile_picture_url = req.file.path; // URL Cloudinary otomatis dari multer
       await profile.save();
 
-      res.status(200).json({ message: "Gambar profil berhasil diperbarui.", profile });
+      res.status(200).json({
+        message: "Gambar profil berhasil diperbarui.",
+        profile_picture_url: profile.profile_picture_url,
+      });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+      console.error("Error updating profile picture:", error);
+      res.status(500).json({
+        message: "Terjadi kesalahan pada server. Silakan coba lagi nanti.",
+      });
     }
   },
 ];
 
-// Fungsi untuk memperbarui lisensi praktik
+// Endpoint untuk memperbarui lisensi praktik
 exports.updatePracticeLicense = [
-  upload.single('practice_license'), // Middleware untuk menangani upload file
+  upload.single('practice_license'), // Middleware Multer untuk menangani file upload
   async (req, res) => {
-    const userId = req.user.user_id;
+    const userId = req.user.user_id; // Mendapatkan user ID dari JWT
 
     if (!req.file) {
       return res.status(400).json({ message: "Lisensi praktik tidak boleh kosong." });
     }
 
     try {
-      // Mengunggah lisensi praktik ke Cloudinary
-      const result = await uploadToCloudinary(req.file);
-
       // Cari profil berdasarkan user_id
       const profile = await Profile.findOne({ where: { user_id: userId } });
 
@@ -227,14 +225,19 @@ exports.updatePracticeLicense = [
         return res.status(404).json({ message: "Profil tidak ditemukan." });
       }
 
-      // Menyimpan URL lisensi praktik yang diunggah ke Cloudinary
-      profile.practice_license_url = result.secure_url;
+      // Simpan URL lisensi praktik ke dalam kolom `practice_license_url`
+      profile.practice_license_url = req.file.path; // URL Cloudinary otomatis dari multer
       await profile.save();
 
-      res.status(200).json({ message: "Lisensi praktik berhasil diperbarui.", profile });
+      res.status(200).json({
+        message: "Lisensi praktik berhasil diperbarui.",
+        practice_license_url: profile.practice_license_url,
+      });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+      console.error("Error updating practice license:", error);
+      res.status(500).json({
+        message: "Terjadi kesalahan pada server. Silakan coba lagi nanti.",
+      });
     }
   },
 ];
