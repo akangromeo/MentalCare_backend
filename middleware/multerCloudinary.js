@@ -7,8 +7,8 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     const folder = file.fieldname === "profile_picture" 
-      ? "profile_pictures" 
-      : "practice_licenses";
+      ? "profile_picture" 
+      : "practice_license";
 
     // Mendapatkan format asli file
     const format = file.mimetype.split("/")[1]; // Mengambil ekstensi dari mimetype, misal "image/jpeg" -> "jpeg"
