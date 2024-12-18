@@ -29,28 +29,28 @@ exports.getLatestResult = async (req, res) => {
 };
 
 // Mengambil semua hasil tes untuk pasien (riwayat)
-exports.getResultsHistory = async (req, res) => {
-  try {
-    const { patient_id } = req.params;
+// exports.getResultsHistory = async (req, res) => {
+//   try {
+//     const { patient_id } = req.params;
 
-    // Mengambil semua hasil tes berdasarkan patient_id
-    const results = await Dass42Result.findAll({
-      where: { patient_id },
-      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes terbaru
-    });
+//     // Mengambil semua hasil tes berdasarkan patient_id
+//     const results = await Dass42Result.findAll({
+//       where: { patient_id },
+//       order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes terbaru
+//     });
 
-    if (!results || results.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No results found for this patient" });
-    }
+//     if (!results || results.length === 0) {
+//       return res
+//         .status(404)
+//         .json({ message: "No results found for this patient" });
+//     }
 
-    // Mengembalikan riwayat hasil tes
-    res.json(results);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+//     // Mengembalikan riwayat hasil tes
+//     res.json(results);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 exports.getResultByPatientId = async (req, res) => {
   const patient_id = req.user.user_id; // Mendapatkan ID pasien dari JWT

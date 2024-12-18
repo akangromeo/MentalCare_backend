@@ -11,11 +11,11 @@ router.get(
 );
 
 // Mendapatkan riwayat hasil tes pasien
-router.get(
-  "/history/:patient_id",
-  authenticate,
-  resultsController.getResultsHistory
-);
+// router.get(
+//   "/history/:patient_id",
+//   authenticate,
+//   resultsController.getResultsHistory
+// );
 
 // Mendapatkan hasil tes berdasarkan patient_id
 router.get("/results-user", authenticate, resultsController.getResultByPatientId);
