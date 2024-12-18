@@ -24,6 +24,12 @@ router.put("/profile/phone", authenticate, profileController.updatePhone);
 // Route untuk memperbarui gender pengguna
 router.put("/profile/gender", authenticate, profileController.updateGender);
 
+// Route untuk memperbarui gambar profil
+router.put("/profile/profile-picture", authenticate, profileController.updateProfilePicture);
+
+// Route untuk memperbarui lisensi praktik
+router.put("/profile/practice-license", authenticate, profileController.updatePracticeLicense);
+
 router.get("/get-all-gender", profileController.getGender);
 
 

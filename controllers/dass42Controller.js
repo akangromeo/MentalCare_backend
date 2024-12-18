@@ -22,6 +22,46 @@ exports.getQuestions = async (req, res) => {
   }
 };
 
+exports.createQuestion = async (req, res) => {
+	try {
+		const { question_text, category_id } = req.body;
+
+		// Validasi: pastikan question_text dan category_id ada di request body
+		if (!question_text || !category_id) {
+			return res.status(400).json({
+				message: "question_text dan category_id wajib diisi",
+			});
+		}
+
+		// Ambil nilai question_order tertinggi
+		const lastQuestion = await Dass42Question.findOne({
+			order: [["question_order", "DESC"]], // Urutkan berdasarkan question_order secara menurun
+		});
+
+		// Tentukan question_order untuk pertanyaan baru
+		let newQuestionOrder = 1; // Jika tidak ada pertanyaan sebelumnya, set question_order ke 1
+		if (lastQuestion) {
+			newQuestionOrder = lastQuestion.question_order + 1; // Tambah 1 dari question_order terakhir
+		}
+
+		// Buat pertanyaan baru dengan question_order otomatis
+		const newQuestion = await Dass42Question.create({
+			question_text,
+			question_order: newQuestionOrder,
+			category_id, // Pastikan ini sesuai dengan foreign key di relasi
+		});
+
+		// Kembalikan respons dengan data pertanyaan baru
+		res.status(201).json({
+			message: "Soal berhasil dibuat",
+			data: newQuestion,
+		});
+	} catch (error) {
+		// Menangani kesalahan
+		res.status(500).json({ message: error.message });
+	}
+};
+
 exports.updateQuestion = async (req, res) => {
 	try {
 		const { id } = req.params; // Ambil ID dari parameter URL

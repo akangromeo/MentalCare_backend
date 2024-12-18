@@ -1,7 +1,9 @@
 const db = require("../models");
-const Profile = db.Profile;
 const User = db.User;
 const Gender = db.Gender;
+const Profile = require('../models/Profile');
+const uploadToCloudinary = require('../utils/uploadToCloudinary');
+const { upload } = require('../middleware/upload');
 
 // Fungsi untuk mengambil profil pengguna
 exports.getProfile = async (req, res) => {
@@ -170,6 +172,73 @@ exports.updateGender = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
+
+// Fungsi untuk memperbarui gambar profil
+exports.updateProfilePicture = [
+  upload.single('profile_picture'), // Middleware untuk menangani upload file
+  async (req, res) => {
+    const userId = req.user.user_id;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Gambar profil tidak boleh kosong." });
+    }
+
+    try {
+      // Mengunggah gambar ke Cloudinary
+      const result = await uploadToCloudinary(req.file);
+
+      // Cari profil berdasarkan user_id
+      const profile = await Profile.findOne({ where: { user_id: userId } });
+
+      if (!profile) {
+        return res.status(404).json({ message: "Profil tidak ditemukan." });
+      }
+
+      // Menyimpan URL gambar yang diunggah ke Cloudinary
+      profile.profile_picture_url = result.secure_url;  // Gambar berhasil diupload
+      await profile.save();
+
+      res.status(200).json({ message: "Gambar profil berhasil diperbarui.", profile });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+    }
+  },
+];
+
+// Fungsi untuk memperbarui lisensi praktik
+exports.updatePracticeLicense = [
+  upload.single('practice_license'), // Middleware untuk menangani upload file
+  async (req, res) => {
+    const userId = req.user.user_id;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Lisensi praktik tidak boleh kosong." });
+    }
+
+    try {
+      // Mengunggah lisensi praktik ke Cloudinary
+      const result = await uploadToCloudinary(req.file);
+
+      // Cari profil berdasarkan user_id
+      const profile = await Profile.findOne({ where: { user_id: userId } });
+
+      if (!profile) {
+        return res.status(404).json({ message: "Profil tidak ditemukan." });
+      }
+
+      // Menyimpan URL lisensi praktik yang diunggah ke Cloudinary
+      profile.practice_license_url = result.secure_url;
+      await profile.save();
+
+      res.status(200).json({ message: "Lisensi praktik berhasil diperbarui.", profile });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+    }
+  },
+];
+
 
 exports.getGender = async (req, res) => {
   try {
