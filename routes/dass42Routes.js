@@ -14,6 +14,8 @@ router.put(
 	dass42Controller.softDeleteQuestion
 );
 
+router.get("/category", authenticate, dass42Controller.getCategory);
+
 // Endpoint untuk mengirimkan hasil tes (jawaban pengguna)
 router.post("/submit", authenticate, dass42Controller.submitTest);
 

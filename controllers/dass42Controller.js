@@ -102,6 +102,26 @@ exports.softDeleteQuestion = async (req, res) => {
 	}
 };
 
+exports.getCategory = async (req, res) => {
+	try {
+		const CategoryList = await Category.findAll({
+			order: [["category_id", "ASC"]],
+		});
+
+		const CategoryData = CategoryList.map((category) => {
+			return {
+				category_id: category.category_id,
+				category_name: category.category_name,
+			};
+		});
+
+		res.json(CategoryData);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Terjadi kesalahan pada server" });
+	}
+};
+
 // Mengumpulkan jawaban dan menyimpan hasil tes
 exports.submitTest = async (req, res) => {
   const { responses, psikolog_id } = req.body;
