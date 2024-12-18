@@ -94,9 +94,6 @@ exports.getAllPsikolog = async (req, res) => {
 };
 
 
-
-
-
 exports.updateUserStatus = async (req, res) => {
   try {
     // Log untuk debugging

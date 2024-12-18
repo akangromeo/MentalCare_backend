@@ -111,9 +111,6 @@ exports.getResultByPatientId = async (req, res) => {
   }
 };
 
-
-
-
 exports.getResultByPsikologId = async (req, res) => {
   const psikolog_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
 
@@ -141,6 +138,62 @@ exports.getResultByPsikologId = async (req, res) => {
       return res.status(404).json({
         message: "No test results found for this psikolog_id",
         psikolog_id,
+      });
+    }
+
+    // Menyusun response
+    const resultData = results.map((result) => {
+      const profile = result.patient?.Profile; // Ambil profil dari relasi
+      return {
+        result_id: result.result_id,
+        patient_id: result.patient_id,
+        psikolog_id: result.psikolog_id,
+        depression_score: result.depression_score,
+        anxiety_score: result.anxiety_score,
+        stress_score: result.stress_score,
+        date_taken: result.date_taken,
+        // Data profil pasien
+        name: profile ? profile.name : null,
+        birth_date: profile ? profile.birth_date : null,
+        
+        phone: profile ? profile.phone : null,
+       
+      };
+    });
+
+    res.json(resultData);
+  } catch (error) {
+    console.error("Error fetching results by psikolog_id: ", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAllResult = async (req, res) => {
+  const admin_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
+
+  try {
+    // Query hasil tes berdasarkan psikolog_id
+    const results = await Dass42Result.findAll({
+      include: [
+        {
+          model: User, // Join ke tabel Users
+          as: "patient", // Alias relasi pasien
+          attributes: ["user_id"], // Ambil user_id dari tabel Users
+          include: [
+            {
+              model: Profile, // Join ke tabel Profiles melalui user_id
+              attributes: ["name", "birth_date",  "phone"],
+            },
+          ],
+        },
+      ],
+      order: [["date_taken", "DESC"]], // Urutkan berdasarkan tanggal tes
+    });
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({
+        message: "No test results found for admin"
+       
       });
     }
 

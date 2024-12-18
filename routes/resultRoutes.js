@@ -26,4 +26,6 @@ router.get("/results-user", authenticate, resultsController.getResultByPatientId
 // Endpoint untuk mendapatkan hasil tes berdasarkan psikolog_id (untuk satu hasil tes)
 router.get("/results-psikolog", authenticate, resultsController.getResultByPsikologId);
 
+router.get("/all-results", authenticate, resultsController.getAllResult);
+
 module.exports = router;
