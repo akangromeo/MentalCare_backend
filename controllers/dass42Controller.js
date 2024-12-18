@@ -22,6 +22,29 @@ exports.getQuestions = async (req, res) => {
   }
 };
 
+exports.updateQuestion = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { question_text, question_order, category_id } = req.body;
+
+		const question = await Dass42Question.findByPk(id);
+
+		if (!question) {
+			return res.status(404).json({ error: "Question not found" });
+		}
+
+		question.question_text = question_text;
+		question.question_order = question_order;
+		question.category_id = category_id;
+
+		await question.save();
+
+		res.json(question);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 // Mengumpulkan jawaban dan menyimpan hasil tes
 exports.submitTest = async (req, res) => {
   const { responses, psikolog_id } = req.body;

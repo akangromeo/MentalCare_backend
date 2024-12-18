@@ -6,6 +6,8 @@ const authenticate = require("../middleware/authenticate");
 // Endpoint untuk mengambil soal tes
 router.get("/questions", authenticate, dass42Controller.getQuestions);
 
+router.put("/questions/:id", authenticate, dass42Controller.updateQuestion);
+
 // Endpoint untuk mengirimkan hasil tes (jawaban pengguna)
 router.post("/submit", authenticate, dass42Controller.submitTest);
 
