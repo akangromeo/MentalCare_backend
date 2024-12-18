@@ -5,66 +5,168 @@ const Gender = db.Gender;
 
 // Fungsi untuk mengambil profil pengguna
 exports.getProfile = async (req, res) => {
-  const userId = req.user.user_id; // Ambil user_id dari JWT yang sudah diverifikasi oleh middleware
+  const userId = req.user.user_id;
 
   try {
-    // Mencari profil berdasarkan user_id
+    console.log(`Mencari profil untuk user_id: ${userId}`);
     const profile = await Profile.findOne({
       where: { user_id: userId },
-      include: [User, Gender], // Termasuk informasi dari tabel User dan Gender
+      include: [User, Gender],
     });
 
     if (!profile) {
-      return res.status(404).json({ message: "Profil tidak ditemukan" });
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
     }
 
-    // Kirimkan profil pengguna yang ditemukan
     res.status(200).json(profile);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    console.error("Error saat mengambil profil:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
 
-// Fungsi untuk memperbarui profil pengguna
-exports.updateProfile = async (req, res) => {
-  const userId = req.user.user_id; 
-  const {
-    name,
-    birth_date,
-    address,
-    phone,
-    gender_id,
-    profile_picture_url,
-    practice_license_url,
-  } = req.body;
+// Fungsi untuk memperbarui nama pengguna
+exports.updateName = async (req, res) => {
+  const userId = req.user.user_id;
+  const { name } = req.body;
+
+  if (!name) {
+    console.warn("Permintaan update nama tanpa nama.");
+    return res.status(400).json({ message: "Nama tidak boleh kosong." });
+  }
 
   try {
-    // Mencari profil pengguna berdasarkan user_id
+    console.log(`Memperbarui nama untuk user_id: ${userId} menjadi: ${name}`);
     const profile = await Profile.findOne({ where: { user_id: userId } });
 
     if (!profile) {
-      return res.status(404).json({ message: "Profil tidak ditemukan" });
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
     }
 
-    // Memperbarui informasi profil dengan data dari body request
-    profile.name = name || profile.name;
-    profile.birth_date = birth_date || profile.birth_date;
-    profile.address = address || profile.address;
-    profile.phone = phone || profile.phone;
-    profile.gender_id = gender_id || profile.gender_id;
-    profile.profile_picture_url =
-      profile_picture_url || profile.profile_picture_url;
-    profile.practice_license_url =
-      practice_license_url || profile.practice_license_url;
-
-    // Menyimpan perubahan profil
+    profile.name = name;
     await profile.save();
 
-    // Kirimkan data profil yang telah diperbarui
-    res.status(200).json({ message: "Profil berhasil diperbarui", profile });
+    res.status(200).json({ message: "Nama berhasil diperbarui.", profile });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    console.error("Error saat memperbarui nama:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+  }
+};
+
+// Fungsi untuk memperbarui tanggal lahir pengguna
+exports.updateBirthDate = async (req, res) => {
+  const userId = req.user.user_id;
+  const { birth_date } = req.body;
+
+  if (!birth_date) {
+    console.warn("Permintaan update tanggal lahir tanpa tanggal lahir.");
+    return res.status(400).json({ message: "Tanggal lahir tidak boleh kosong." });
+  }
+
+  try {
+    console.log(`Memperbarui tanggal lahir untuk user_id: ${userId} menjadi: ${birth_date}`);
+    const profile = await Profile.findOne({ where: { user_id: userId } });
+
+    if (!profile) {
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
+    }
+
+    profile.birth_date = birth_date;
+    await profile.save();
+
+    res.status(200).json({ message: "Tanggal lahir berhasil diperbarui.", profile });
+  } catch (error) {
+    console.error("Error saat memperbarui tanggal lahir:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+  }
+};
+
+// Fungsi untuk memperbarui alamat pengguna
+exports.updateAddress = async (req, res) => {
+  const userId = req.user.user_id;
+  const { address } = req.body;
+
+  if (!address) {
+    console.warn("Permintaan update alamat tanpa alamat.");
+    return res.status(400).json({ message: "Alamat tidak boleh kosong." });
+  }
+
+  try {
+    console.log(`Memperbarui alamat untuk user_id: ${userId} menjadi: ${address}`);
+    const profile = await Profile.findOne({ where: { user_id: userId } });
+
+    if (!profile) {
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
+    }
+
+    profile.address = address;
+    await profile.save();
+
+    res.status(200).json({ message: "Alamat berhasil diperbarui.", profile });
+  } catch (error) {
+    console.error("Error saat memperbarui alamat:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+  }
+};
+
+// Fungsi untuk memperbarui nomor telepon pengguna
+exports.updatePhone = async (req, res) => {
+  const userId = req.user.user_id;
+  const { phone } = req.body;
+
+  if (!phone) {
+    console.warn("Permintaan update nomor telepon tanpa nomor telepon.");
+    return res.status(400).json({ message: "Nomor telepon tidak boleh kosong." });
+  }
+
+  try {
+    console.log(`Memperbarui nomor telepon untuk user_id: ${userId} menjadi: ${phone}`);
+    const profile = await Profile.findOne({ where: { user_id: userId } });
+
+    if (!profile) {
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
+    }
+
+    profile.phone = phone;
+    await profile.save();
+
+    res.status(200).json({ message: "Nomor telepon berhasil diperbarui.", profile });
+  } catch (error) {
+    console.error("Error saat memperbarui nomor telepon:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
+  }
+};
+
+// Fungsi untuk memperbarui gender pengguna
+exports.updateGender = async (req, res) => {
+  const userId = req.user.user_id;
+  const { gender_id } = req.body;
+
+  if (!gender_id) {
+    console.warn("Permintaan update gender tanpa gender_id.");
+    return res.status(400).json({ message: "ID gender tidak boleh kosong." });
+  }
+
+  try {
+    console.log(`Memperbarui gender untuk user_id: ${userId} menjadi: ${gender_id}`);
+    const profile = await Profile.findOne({ where: { user_id: userId } });
+
+    if (!profile) {
+      console.warn(`Profil tidak ditemukan untuk user_id: ${userId}`);
+      return res.status(404).json({ message: "Profil tidak ditemukan." });
+    }
+
+    profile.gender_id = gender_id;
+    await profile.save();
+
+    res.status(200).json({ message: "Gender berhasil diperbarui.", profile });
+  } catch (error) {
+    console.error("Error saat memperbarui gender:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
