@@ -266,7 +266,7 @@ exports.getResultByPatientId = async (req, res) => {
 };
 
 exports.getResultByPsikologId = async (req, res) => {
-  const pskikolog_id = req.user.user_id; // Mendapatkan ID pasien dari JWT
+  const psikolog_id = req.user.user_id; // Mendapatkan ID pasien dari JWT
 
   try {
     // Mencari hasil tes berdasarkan patient_id
