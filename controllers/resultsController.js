@@ -3,6 +3,7 @@ const Dass42Response = require("../models/Dass42Response");
 const Dass42Question = require("../models/Dass42Question");
 const Category = require("../models/Category");
 const Profile = require("../models/Profile");
+const User = require("../models/User");
 
 
 
