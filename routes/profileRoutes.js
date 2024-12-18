@@ -24,7 +24,7 @@ router.put("/profile/phone", authenticate, profileController.updatePhone);
 // Route untuk memperbarui gender pengguna
 router.put("/profile/gender", authenticate, profileController.updateGender);
 
-router.get("/get-all-gender", profileController.getGender);
+router.get("/get-all-gender", authenticate, profileController.getGender);
 
 
 
