@@ -25,7 +25,7 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
-
+/*
 // Fungsi untuk memperbarui nama pengguna
 exports.updateName = async (req, res) => {
   const userId = req.user.user_id;
@@ -170,3 +170,4 @@ exports.updateGender = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
+*/
