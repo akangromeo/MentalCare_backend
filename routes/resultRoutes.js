@@ -20,8 +20,8 @@ router.get(
 // Mendapatkan hasil tes berdasarkan patient_id
 router.get("/results-user", authenticate, resultsController.getResultByPatientId);
 
-// // Mendapatkan hasil tes berdasarkan result_id
-router.get("/result/:result_id", authenticate, resultsController.getResultById);
+// // // Mendapatkan hasil tes berdasarkan result_id
+// router.get("/result/:result_id", authenticate, resultsController.getResultById);
 
 // Endpoint untuk mendapatkan hasil tes berdasarkan psikolog_id (untuk satu hasil tes)
 router.get("/results-psikolog", authenticate, resultsController.getResultByPsikologId);
