@@ -24,24 +24,55 @@ exports.getQuestions = async (req, res) => {
 
 exports.updateQuestion = async (req, res) => {
 	try {
-		const { id } = req.params;
-		const { question_text, question_order, category_id } = req.body;
+		const { id } = req.params; // Ambil ID dari parameter URL
+		const { question_text, question_order, category_id } = req.body; // Data yang diupdate
 
+		// Cari pertanyaan berdasarkan ID
 		const question = await Dass42Question.findByPk(id);
 
+		// Jika pertanyaan tidak ditemukan
 		if (!question) {
-			return res.status(404).json({ error: "Question not found" });
+			return res.status(404).json({
+				message: "Question not found",
+				details: `No question found with the ID: ${id}`,
+			});
 		}
 
+		// Validasi input: Pastikan data yang dikirim sesuai dengan format yang diharapkan
+		if (!question_text || !question_order || !category_id) {
+			return res.status(400).json({
+				message: "Invalid input data",
+				details:
+					"Fields question_text, question_order, and category_id are required.",
+			});
+		}
+
+		// Update data pertanyaan
 		question.question_text = question_text;
 		question.question_order = question_order;
 		question.category_id = category_id;
 
+		// Simpan perubahan ke database
 		await question.save();
 
-		res.json(question);
+		// Kirim respon sukses dengan detail data yang diperbarui
+		res.status(200).json({
+			message: "Update pertanyaan berhasil!",
+			data: {
+				id: question.question_id,
+				question_text: question.question_text,
+				question_order: question.question_order,
+				category_id: question.category_id,
+			},
+		});
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		// Tangani error tak terduga
+		res.status(500).json({
+			status: "error",
+			code: 500,
+			message: "Internal server error",
+			details: error.message,
+		});
 	}
 };
 
