@@ -14,6 +14,6 @@ router.put("/:user_id/status", authenticate, userController.updateUserStatus);
 
 router.get("/get-all-roles",  userController.getRoles);
 
-// router.get("/get-all-status", authenticate, userController.getStatusPsikolog);
+router.get("/get-all-status", authenticate, userController.getStatusPsikolog);
 
 module.exports = router;

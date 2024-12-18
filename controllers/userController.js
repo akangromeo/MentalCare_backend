@@ -150,22 +150,22 @@ exports.getRoles = async (req, res) => {
   }
 };
 
-// exports.getStatusPsikolog = async (req, res) => {
-//   try {
-//     const Statuslist = await Status.findAll({
-//       order: [["status_id", "DESC"]],
-//     });
+exports.getStatusPsikolog = async (req, res) => {
+  try {
+    const Statuslist = await Status.findAll({
+      order: [["status_id", "DESC"]],
+    });
 
-//     const StatusData = Statuslist.map((status) => {
-//       return {
-//         status_id: status.status_id,
-//         role_name: status.status_name,
-//       };
-//     });
+    const StatusData = Statuslist.map((status) => {
+      return {
+        status_id: status.status_id,
+        status_name: status.status_name,
+      };
+    });
 
-//     res.json(StatusData);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Terjadi kesalahan pada server" });
-//   }
-// };
+    res.json(StatusData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
