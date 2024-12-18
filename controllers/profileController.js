@@ -2,7 +2,7 @@ const db = require("../models");
 const User = db.User;
 const Gender = db.Gender;
 const Profile = require('../models/Profile');
-const upload = require('../config/multerCloudinary'); 
+const upload = require('../middleware/multerCloudinary'); 
 
 // Fungsi untuk mengambil profil pengguna
 exports.getProfile = async (req, res) => {
