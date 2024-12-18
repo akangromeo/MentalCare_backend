@@ -291,7 +291,7 @@ exports.getResultByPsikologId = async (req, res) => {
   try {
     // Mencari hasil tes berdasarkan psikolog_id
     const results = await Dass42Result.findAll({
-      where: { psikolog_id },
+      where: { "psikolog_id" :  psikolog_id },
       include: [
         {
           model: Dass42Response,
