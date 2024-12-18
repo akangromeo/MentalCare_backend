@@ -266,14 +266,10 @@ exports.getResultByPatientId = async (req, res) => {
 };
 
 exports.getResultByPsikologId = async (req, res) => {
-  const psikolog_id = req.user?.user_id; // Mendapatkan ID psikolog dari JWT
-
-  if (!psikolog_id) {
-    return res.status(400).json({ message: "Invalid psikolog ID" });
-  }
+  const psikolog_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
 
   try {
-    // Query hasil tes berdasarkan psikolog_id
+    // Mencari hasil tes berdasarkan psikolog_id
     const results = await Dass42Result.findAll({
       where: { psikolog_id },
       include: [
@@ -281,42 +277,51 @@ exports.getResultByPsikologId = async (req, res) => {
           model: Dass42Response,
           include: [
             {
-              model: Dass42Question,
-              include: [Category],
+              model: Dass42Question, // Mengambil pertanyaan DASS42
+              include: [Category], // Mengambil kategori dari setiap pertanyaan
             },
           ],
         },
       ],
-      order: [["date_taken", "DESC"]],
+      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes diambil
     });
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "No test results found" });
+      return res.status(404).json({ message: "No test results found for this psikolog_id" });
     }
 
-    // Format data hasil tes
-    const resultData = results.map((result) => ({
-      result_id: result.result_id,
-      patient_id: result.patient_id,
-      psikolog_id: result.psikolog_id,
-      depression_score: result.depression_score,
-      anxiety_score: result.anxiety_score,
-      stress_score: result.stress_score,
-      date_taken: result.date_taken,
-      responses: result.dass42_responses?.map((response) => ({
-        question_id: response.question_id,
-        score: response.score,
-        category: response.dass42_question?.category?.category_name || null,
-      })) || [], // Jika tidak ada responses, kembalikan array kosong
-    }));
+    // Menyusun response untuk hasil tes
+    const resultData = results.map((result) => {
+      return {
+        result_id: result.result_id,
+        patient_id: result.patient_id,
+        psikolog_id: result.psikolog_id,
+        depression_score: result.depression_score,
+        anxiety_score: result.anxiety_score,
+        stress_score: result.stress_score,
+        date_taken: result.date_taken,
+        responses: result.dass42_responses
+          ? result.dass42_responses.map((response) => {
+              return {
+                question_id: response.question_id,
+                score: response.score,
+                category:
+                  response.dass42_question && response.dass42_question.category
+                    ? response.dass42_question.category.category_name
+                    : null, // Menangani null jika kategori tidak ada
+              };
+            })
+          : [], // Jika tidak ada responses, kembalikan array kosong
+      };
+    });
 
-    // Kembalikan data dalam format JSON
     res.json(resultData);
   } catch (error) {
-    console.error("Error fetching test results:", error);
+    console.error("Error fetching results by psikolog_id: ", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 exports.getResultById = async (req, res) => {
