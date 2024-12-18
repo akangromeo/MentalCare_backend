@@ -146,13 +146,9 @@ exports.getResultByPsikologId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
-        patient_profile: result.patient_profile
-          ? {
-              name: result.patient_profile.name,
-              phone: result.patient_profile.phone,
-              
-            }
-          : null, // Jika profil tidak ditemukan
+        name: result.patient_profile ? result.patient_profile.name : null,
+        
+        phone: result.patient_profile ? result.patient_profile.phone : null, // Jika profil tidak ditemukan
       };
     });
 
