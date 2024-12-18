@@ -308,10 +308,7 @@ exports.getResultByPatientId = async (req, res) => {
               return {
                 question_id: response.question_id,
                 score: response.score,
-                category:
-                  response.dass42_question && response.dass42_question.category
-                    ? response.dass42_question.category.category_name
-                    : null, // Menangani null jika kategori tidak ada
+               
               };
             })
           : [], // Jika tidak ada responses, kembalikan array kosong
