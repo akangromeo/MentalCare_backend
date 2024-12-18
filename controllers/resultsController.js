@@ -59,29 +59,35 @@ exports.getResultByPatientId = async (req, res) => {
   const patient_id = req.user.user_id; // Mendapatkan ID pasien dari JWT
 
   try {
-    // Mencari hasil tes berdasarkan patient_id
+    // Query hasil tes berdasarkan psikolog_id
     const results = await Dass42Result.findAll({
       where: { patient_id },
       include: [
         {
-          model: Dass42Response,
+          model: User, // Join ke tabel Users
+          as: "patient", // Alias relasi pasien
+          attributes: ["user_id"], // Ambil user_id dari tabel Users
           include: [
             {
-              model: Dass42Question, // Tidak perlu alias lagi
-              include: [Category], // Menyertakan kategori untuk pertanyaan
+              model: Profile, // Join ke tabel Profiles melalui user_id
+              attributes: ["name", "birth_date",  "phone"],
             },
           ],
         },
       ],
-      order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes diambil
+      order: [["date_taken", "DESC"]], // Urutkan berdasarkan tanggal tes
     });
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "No test results found" });
+      return res.status(404).json({
+        message: "No test results found for this psikolog_id",
+        psikolog_id,
+      });
     }
 
-    // Menyusun response untuk hasil tes
+    // Menyusun response
     const resultData = results.map((result) => {
+      const profile = result.patient?.Profile; // Ambil profil dari relasi
       return {
         result_id: result.result_id,
         patient_id: result.patient_id,
@@ -90,13 +96,17 @@ exports.getResultByPatientId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
+        // Data profil pasien
+        name: profile ? profile.name : null,
+        birth_date: profile ? profile.birth_date : null,
         
+        phone: profile ? profile.phone : null,
       };
     });
 
     res.json(resultData);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching results by psikolog_id: ", error);
     res.status(500).json({ error: error.message });
   }
 };
