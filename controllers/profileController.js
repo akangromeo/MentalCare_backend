@@ -170,3 +170,23 @@ exports.updateGender = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server. Silakan coba lagi nanti." });
   }
 };
+
+exports.getGender = async (req, res) => {
+  try {
+    const Genderlist = await Gender.findAll({
+      order: [["gender_id", "DESC"]],
+    });
+
+    const GenderData = Roleslist.map((gender) => {
+      return {
+        gender_id: gender.gender_id,
+        gender_name: gender.gender_name,
+      };
+    });
+
+    res.json(GenderData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
