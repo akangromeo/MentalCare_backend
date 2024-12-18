@@ -177,7 +177,7 @@ exports.getGender = async (req, res) => {
       order: [["gender_id", "DESC"]],
     });
 
-    const GenderData = Roleslist.map((gender) => {
+    const GenderData = Genderlist.map((gender) => {
       return {
         gender_id: gender.gender_id,
         gender_name: gender.gender_name,
