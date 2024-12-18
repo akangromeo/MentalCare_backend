@@ -2,6 +2,8 @@ const Dass42Result = require("../models/Dass42Result");
 const Dass42Response = require("../models/Dass42Response");
 const Dass42Question = require("../models/Dass42Question");
 const Category = require("../models/Category");
+const Profile = require("../models/Profile");
+
 
 
 // Mengambil hasil tes terbaru dari pasien
@@ -87,18 +89,7 @@ exports.getResultByPatientId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
-        responses: result.dass42_responses
-          ? result.dass42_responses.map((response) => {
-              return {
-                question_id: response.question_id,
-                score: response.score,
-                category:
-                  response.dass42_question && response.dass42_question.category
-                    ? response.dass42_question.category.category_name
-                    : null, // Menangani null jika kategori tidak ada
-              };
-            })
-          : [], // Jika tidak ada responses, kembalikan array kosong
+        
       };
     });
 
@@ -108,6 +99,9 @@ exports.getResultByPatientId = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
 
 exports.getResultByPsikologId = async (req, res) => {
   const psikolog_id = req.user.user_id; // Mendapatkan ID psikolog dari JWT
@@ -126,15 +120,23 @@ exports.getResultByPsikologId = async (req, res) => {
             },
           ],
         },
+        {
+          model: Profile, // Menambahkan join ke tabel Profile
+          as: "patient_profile", // Alias untuk relasi profil pasien
+          attributes: ["name", "phone",], // Atribut yang ingin diambil
+        },
       ],
       order: [["date_taken", "DESC"]], // Mengurutkan berdasarkan tanggal tes diambil
     });
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "No test results found for this psikolog_id" , psikolog_id});
+      return res.status(404).json({
+        message: "No test results found for this psikolog_id",
+        psikolog_id,
+      });
     }
 
-    // Menyusun response untuk hasil tes
+    // Menyusun response untuk hasil tes beserta profil pasien
     const resultData = results.map((result) => {
       return {
         result_id: result.result_id,
@@ -144,6 +146,13 @@ exports.getResultByPsikologId = async (req, res) => {
         anxiety_score: result.anxiety_score,
         stress_score: result.stress_score,
         date_taken: result.date_taken,
+        patient_profile: result.patient_profile
+          ? {
+              name: result.patient_profile.name,
+              phone: result.patient_profile.phone,
+              
+            }
+          : null, // Jika profil tidak ditemukan
       };
     });
 
@@ -153,3 +162,4 @@ exports.getResultByPsikologId = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
