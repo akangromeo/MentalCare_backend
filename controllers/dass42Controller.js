@@ -241,6 +241,7 @@ exports.submitTest = async (req, res) => {
     // 4. Memperbarui hasil tes dengan skor yang telah dihitung
     await result.update(
       {
+
         depression_score,
         anxiety_score,
         stress_score,
@@ -255,6 +256,7 @@ exports.submitTest = async (req, res) => {
     res.json({
       message: "Test submitted successfully",
       result: {
+		result_id: result.result_id,
         depression_score,
         anxiety_score,
         stress_score,
@@ -267,6 +269,54 @@ exports.submitTest = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.updateResultWithPsikolog = async (req, res) => {
+	const { result_id, psikolog_id } = req.body; // Ambil result_id dan psikolog_id dari body
+  
+	// Validasi input
+	if (!result_id) {
+	  return res.status(400).json({ message: "Result ID is required" });
+	}
+  
+	if (!psikolog_id) {
+	  return res.status(400).json({ message: "Psikolog ID is required" });
+	}
+  
+	// Mulai transaksi
+	const transaction = await sequelize.transaction();
+  
+	try {
+	  // 1. Cari hasil tes berdasarkan result_id
+	  const result = await Dass42Result.findByPk(result_id);
+  
+	  if (!result) {
+		return res.status(404).json({ message: "Result not found" });
+	  }
+  
+	  // 2. Perbarui hasil tes dengan psikolog_id
+	  await result.update(
+		{
+		  psikolog_id, // Tambahkan psikolog_id ke hasil tes
+		},
+		{ transaction }
+	  );
+  
+	  // 3. Commit transaksi
+	  await transaction.commit();
+  
+	  // 4. Kembalikan respons berhasil
+	  res.json({
+		message: "Result updated successfully",
+		result: result,
+	  });
+	} catch (error) {
+	  // Rollback jika ada error
+	  await transaction.rollback();
+	  console.error(error);
+	  res.status(500).json({ error: error.message });
+	}
+  };
+  
 
 
 

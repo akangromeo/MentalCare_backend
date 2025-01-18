@@ -21,4 +21,6 @@ router.get("/category", authenticate, dass42Controller.getCategory);
 // Endpoint untuk mengirimkan hasil tes (jawaban pengguna)
 router.post("/submit", authenticate, dass42Controller.submitTest);
 
+router.put("/choose-psikolog", authenticate, dass42Controller.updateResultWithPsikolog)
+
 module.exports = router;

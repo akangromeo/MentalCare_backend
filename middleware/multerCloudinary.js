@@ -24,15 +24,17 @@ const storage = new CloudinaryStorage({
 // Konfigurasi Multer
 const upload = multer({
   storage,
-  fileFilter: (req, file, cb) => {
-    // Filter untuk memastikan file adalah gambar
-    const allowedFormats = ["image/png", "image/jpeg", "image/jpg"];
-    if (allowedFormats.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Format file tidak didukung. Hanya PNG, JPEG, atau JPG yang diperbolehkan."), false);
-    }
-  },
+ fileFilter: (req, file, cb) => {
+  console.log("MIME Type:", file.mimetype); // Cek tipe MIME
+  console.log("File Name:", file.originalname); // Cek nama file
+
+  const allowedFormats = ["image/png", "image/jpeg", "image/jpg"];
+  if (allowedFormats.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Format file tidak didukung. Hanya PNG, JPEG, atau JPG yang diperbolehkan."), false);
+  }
+}
 });
 
 module.exports = upload;
