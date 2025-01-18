@@ -2,7 +2,8 @@ const sequelize = require("../config/database");
 const Dass42Question = require("../models/Dass42Question");
 const Dass42Response = require("../models/Dass42Response");
 const Dass42Result = require("../models/Dass42Result");
-const Category = require("../models/Category"); // Model kategori jika ada relasi
+const Category = require("../models/Category");
+const moment = require('moment');
 
 // Mendapatkan daftar pertanyaan DASS-42
 exports.getQuestions = async (req, res) => {
@@ -180,6 +181,8 @@ exports.submitTest = async (req, res) => {
   // Menggunakan transaksi untuk menjaga integritas data
   const transaction = await sequelize.transaction();
 
+  const formattedDate = moment().format('YYYY-MM-DD HH:mm:ss');
+
   try {
     // 1. Simpan hasil tes terlebih dahulu
     const result = await Dass42Result.create(
@@ -189,7 +192,7 @@ exports.submitTest = async (req, res) => {
         depression_score: 0, // Skor sementara
         anxiety_score: 0, // Skor sementara
         stress_score: 0, // Skor sementara
-        date_taken: new Date(),
+        date_taken: new formattedDate,
       },
       { transaction }
     );
