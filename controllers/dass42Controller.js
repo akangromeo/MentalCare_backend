@@ -192,7 +192,7 @@ exports.submitTest = async (req, res) => {
         depression_score: 0, // Skor sementara
         anxiety_score: 0, // Skor sementara
         stress_score: 0, // Skor sementara
-        date_taken: new formattedDate,
+        date_taken: formattedDate,
       },
       { transaction }
     );
