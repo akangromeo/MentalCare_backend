@@ -263,39 +263,45 @@ exports.getGender = async (req, res) => {
   }
 };
 
-// Fungsi untuk membuat profil pengguna baru
-exports.createProfile = async (req, res) => {
+// Fungsi untuk membuat atau memperbarui profil pengguna
+exports.updateOrCreateProfile = async (req, res) => {
   const userId = req.user.user_id;
   const { name, birth_date, address, phone, gender_id } = req.body;
 
   if (!name || !birth_date || !address || !phone || !gender_id) {
-    console.warn("Permintaan pembuatan profil tidak lengkap.");
+    console.warn("Permintaan pembuatan/pembaruan profil tidak lengkap.");
     return res.status(400).json({ message: "Semua field profil wajib diisi." });
   }
 
   try {
-    console.log(`Mencoba membuat profil untuk user_id: ${userId}`);
-    const existingProfile = await Profile.findOne({ where: { user_id: userId } });
-
-    if (existingProfile) {
-      console.warn(`Profil sudah ada untuk user_id: ${userId}`);
-      return res.status(409).json({ message: "Profil pengguna sudah ada." });
-    }
-
-    const newProfile = await Profile.create({
-      user_id: userId,
-      name: name,
-      birth_date: birth_date,
-      address: address,
-      phone: phone,
-      gender_id: gender_id,
+    console.log(`Mencoba membuat atau memperbarui profil untuk user_id: ${userId}`);
+    const [profile, created] = await Profile.findOrCreate({
+      where: { user_id: userId },
+      defaults: {
+        name: name,
+        birth_date: birth_date,
+        address: address,
+        phone: phone,
+        gender_id: gender_id,
+      },
     });
 
-    console.log(`Profil berhasil dibuat untuk user_id: ${userId}`, newProfile);
-    res.status(201).json({ message: "Profil berhasil dibuat.", profile: newProfile });
+    if (created) {
+      console.log(`Profil berhasil dibuat untuk user_id: ${userId}`, profile);
+      return res.status(201).json({ message: "Profil berhasil dibuat.", profile });
+    } else {
+      profile.name = name;
+      profile.birth_date = birth_date;
+      profile.address = address;
+      profile.phone = phone;
+      profile.gender_id = gender_id;
+      await profile.save();
+      console.log(`Profil berhasil diperbarui untuk user_id: ${userId}`, profile);
+      return res.status(200).json({ message: "Profil berhasil diperbarui.", profile });
+    }
 
   } catch (error) {
-    console.error("Error saat membuat profil:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server saat membuat profil." });
+    console.error("Error saat membuat atau memperbarui profil:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server saat membuat atau memperbarui profil." });
   }
 };
