@@ -6,6 +6,8 @@ const authenticate = require("../middleware/authenticate");
 // Route untuk mengambil profil pengguna
 router.get("/profile", authenticate, profileController.getProfile);
 
+router.post("profile/create-profile", authenticate, profileController.createProfile)
+
 // // Route untuk memperbarui profil pengguna
 // router.put("/profile", authenticate, profileController.updateProfile);
 
