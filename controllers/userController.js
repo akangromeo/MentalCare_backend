@@ -93,6 +93,63 @@ exports.getAllPsikolog = async (req, res) => {
   }
 };
 
+exports.getPsikologById = async (req, res) => {
+  const { id } = req.params; // Ambil ID dari parameter URL
+  try {
+    // Cari psikolog berdasarkan user_id dan role_id = 2
+    const psikolog = await User.findOne({
+      where: {
+        user_id: id,
+        role_id: 2,
+      },
+      include: [
+        {
+          model: Profile, // Menyertakan profil
+          required: false,
+        },
+        {
+          model: Status, // Menyertakan status psikolog
+          required: false,
+        },
+      ],
+    });
+
+    if (!psikolog) {
+      return res.status(404).json({ message: "Psikolog tidak ditemukan" });
+    }
+
+    // Format response dengan data psikolog dan profil
+    const psikologData = {
+      user_id: psikolog.user_id,
+      email: psikolog.email,
+      profile: psikolog.Profile
+        ? {
+            profile_id: psikolog.Profile.dataValues.profile_id,
+            name: psikolog.Profile.dataValues.name,
+            birth_date: psikolog.Profile.dataValues.birth_date,
+            address: psikolog.Profile.dataValues.address,
+            phone: psikolog.Profile.dataValues.phone,
+            profile_picture_url:
+              psikolog.Profile.dataValues.profile_picture_url,
+            practice_license_url:
+              psikolog.Profile.dataValues.practice_license_url,
+          }
+        : null,
+      status: psikolog.Status
+        ? {
+            status_id: psikolog.Status.dataValues.status_id,
+            status_name: psikolog.Status.dataValues.status_name,
+          }
+        : null,
+    };
+
+    res.json(psikologData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
+
 
 exports.updateUserStatus = async (req, res) => {
   try {

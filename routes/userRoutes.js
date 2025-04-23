@@ -12,6 +12,8 @@ router.get("/get-all-psikologs", authenticate, userController.getAllPsikolog);
 
 router.put("/:user_id/status", authenticate, userController.updateUserStatus);
 
+router.get('/psikolog/:id', authenticate, userController.getPsikologById);
+
 router.get("/get-all-roles",  userController.getRoles);
 
 router.get("/get-all-status", authenticate, userController.getStatusPsikolog);
