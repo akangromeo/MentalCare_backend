@@ -11,9 +11,9 @@ router.post("/questions", authenticate, dass42Controller.createQuestion);
 router.put("/questions/:id", authenticate, dass42Controller.updateQuestion);
 
 router.put(
-	"/questions/:id/delete",
-	authenticate,
-	dass42Controller.softDeleteQuestion
+  "/questions/:id/delete",
+  authenticate,
+  dass42Controller.softDeleteQuestion
 );
 
 router.get("/category", authenticate, dass42Controller.getCategory);
@@ -21,6 +21,16 @@ router.get("/category", authenticate, dass42Controller.getCategory);
 // Endpoint untuk mengirimkan hasil tes (jawaban pengguna)
 router.post("/submit", authenticate, dass42Controller.submitTest);
 
-router.put("/choose-psikolog", authenticate, dass42Controller.updateResultWithPsikolog)
+router.put(
+  "/choose-psikolog",
+  authenticate,
+  dass42Controller.updateResultWithPsikolog
+);
+
+router.get(
+  "/responses/:result_id",
+  authenticate,
+  dass42Controller.getResponsesByResultId
+);
 
 module.exports = router;
