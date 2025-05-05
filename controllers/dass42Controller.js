@@ -228,7 +228,7 @@ exports.submitTest = async (req, res) => {
     // Buat map untuk pencarian kategori yang lebih cepat
     const categoryMap = new Map();
     questionsWithCategories.forEach((question) => {
-      categoryMap.set(question.question_id, question.category.category_id);
+      categoryMap.set(question.question_id, question.category_id);
     });
 
     for (const response of responses) {
