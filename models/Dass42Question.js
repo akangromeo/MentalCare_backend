@@ -14,6 +14,14 @@ const Dass42Question = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Category,
+        key: "category_id",
+      },
+    },
     question_order: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -33,6 +41,5 @@ const Dass42Question = sequelize.define(
     },
   }
 );
-
 
 module.exports = Dass42Question;

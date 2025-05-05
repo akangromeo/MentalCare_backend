@@ -195,7 +195,6 @@ exports.submitTest = async (req, res) => {
       include: [
         {
           model: Category,
-          as: "category",
           attributes: ["category_id"], // Hanya ambil category_id
           required: true,
         },
