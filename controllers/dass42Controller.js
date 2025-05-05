@@ -1,10 +1,10 @@
-const sequelize = require("../config/database");
+const { sequelize, Op } = require("../config/database");
 const Dass42Question = require("../models/Dass42Question");
 const Dass42Response = require("../models/Dass42Response");
 const Dass42Result = require("../models/Dass42Result");
 const Category = require("../models/Category");
 const moment = require("moment");
-const { Sequelize, Op } = require("sequelize");
+const { Sequelize } = require("sequelize");
 
 // Mendapatkan daftar pertanyaan DASS-42
 exports.getQuestions = async (req, res) => {
@@ -176,7 +176,7 @@ exports.submitTest = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const result = await db.Dass42Result.create(
+    const result = await Dass42Result.create(
       {
         patient_id,
         psikolog_id,
@@ -189,11 +189,11 @@ exports.submitTest = async (req, res) => {
     );
 
     // 1. Optimized query to fetch questions and categories in one request
-    const questionsWithCategories = await db.Dass42Question.findAll({
+    const questionsWithCategories = await Dass42Question.findAll({
       attributes: ["question_id", "category_id"], // Hanya ambil kolom yang diperlukan
       include: [
         {
-          model: db.Category,
+          model: Category,
           as: "category",
           attributes: ["category_id"], // Hanya ambil category_id
           required: true,
@@ -218,7 +218,7 @@ exports.submitTest = async (req, res) => {
     });
 
     // 3. Bulk insert responses
-    await db.Dass42Response.bulkCreate(responseBatch, { transaction });
+    await Dass42Response.bulkCreate(responseBatch, { transaction });
 
     // 4. Calculate scores efficiently
     let depression_score = 0;
@@ -248,7 +248,7 @@ exports.submitTest = async (req, res) => {
     }
 
     // 5. Update result with calculated scores
-    await result.update(
+    await Dass42Result.update(
       {
         depression_score,
         anxiety_score,
