@@ -163,91 +163,109 @@ exports.getCategory = async (req, res) => {
   }
 };
 
+// Mengumpulkan jawaban dan menyimpan hasil tes
 exports.submitTest = async (req, res) => {
   const { responses, psikolog_id } = req.body;
-  const patient_id = req.user.user_id;
+  const patient_id = req.user.user_id; // ID pengguna dari JWT
 
+  // Validasi input
   if (!responses || responses.length === 0) {
     return res.status(400).json({ message: "No responses provided" });
   }
 
+  // Skor sementara untuk setiap kategori
+  let depression_score = 0;
+  let anxiety_score = 0;
+  let stress_score = 0;
+
+  // Menggunakan transaksi untuk menjaga integritas data
   const transaction = await sequelize.transaction();
+
   const formattedDate = moment().format("YYYY-MM-DD HH:mm:ss");
 
   try {
+    // 1. Simpan hasil tes terlebih dahulu
     const result = await Dass42Result.create(
       {
         patient_id,
         psikolog_id,
-        depression_score: 0, // Placeholder
-        anxiety_score: 0, // Placeholder
-        stress_score: 0, // Placeholder
+        depression_score: 0, // Skor sementara
+        anxiety_score: 0, // Skor sementara
+        stress_score: 0, // Skor sementara
         date_taken: formattedDate,
       },
       { transaction }
     );
 
-    const responseCreations = responses.map((response) => ({
-      result_id: result.result_id,
-      question_id: response.question_id,
-      score: response.score,
-    }));
+    // 2. Ambil kategori terlebih dahulu untuk menghindari query berulang
+    const categories = await Category.findAll();
 
-    await Dass42Response.bulkCreate(responseCreations, { transaction });
+    // 3. Simpan respons jawaban dan hitung skor
+    for (const response of responses) {
+      const { question_id, score } = response;
 
-    // Ambil pertanyaan beserta kategorinya hanya untuk pertanyaan yang ada di respons
-    const questionsWithCategories = await Dass42Question.findAll({
-      where: {
-        question_id: responses.map((r) => r.question_id),
-      },
-      include: [{ model: Category, as: "category" }], // Eager load model Category dengan alias 'category'
-      transaction,
-    });
-
-    const initialScores = { depression: 0, anxiety: 0, stress: 0 };
-    const finalScores = responses.reduce((acc, response) => {
-      const question = questionsWithCategories.find(
-        (q) => q.question_id === response.question_id
+      // Menyimpan respons ke tabel `dass42_responses`
+      await Dass42Response.create(
+        {
+          result_id: result.result_id,
+          question_id,
+          score,
+        },
+        { transaction }
       );
 
-      if (question && question.category && question.category.category_name) {
-        const categoryName = question.category.category_name;
-        if (categoryName === "Depresi") {
-          acc.depression += response.score;
-        } else if (categoryName === "Kecemasan") {
-          acc.anxiety += response.score;
-        } else if (categoryName === "Stres") {
-          acc.stress += response.score;
-        }
-      } else {
-        console.log(
-          `Category for question ID ${response.question_id} not found`
-        );
-      }
-      return acc;
-    }, initialScores);
+      // Cari kategori berdasarkan question_id
+      const question = await Dass42Question.findByPk(question_id);
 
+      if (!question) {
+        console.log(`Question with ID ${question_id} not found`);
+        continue; // Jika tidak ditemukan, lanjutkan ke pertanyaan berikutnya
+      }
+
+      // Tentukan kategori dan tambahkan skor
+      const category = categories.find(
+        (c) => c.category_id === question.category_id
+      );
+
+      if (!category) {
+        console.log(`Category for question ID ${question_id} not found`);
+        continue; // Jika kategori tidak ditemukan, lanjutkan ke pertanyaan berikutnya
+      }
+
+      if (category.category_name === "Depresi") {
+        depression_score += score;
+      } else if (category.category_name === "Kecemasan") {
+        anxiety_score += score;
+      } else if (category.category_name === "Stres") {
+        stress_score += score;
+      }
+    }
+
+    // 4. Memperbarui hasil tes dengan skor yang telah dihitung
     await result.update(
       {
-        depression_score: finalScores.depression,
-        anxiety_score: finalScores.anxiety,
-        stress_score: finalScores.stress,
+        depression_score,
+        anxiety_score,
+        stress_score,
       },
       { transaction }
     );
 
+    // 5. Commit transaksi jika semua berhasil
     await transaction.commit();
 
+    // 6. Kembalikan hasil tes yang sudah diperbarui
     res.json({
       message: "Test submitted successfully",
       result: {
         result_id: result.result_id,
-        depression_score: finalScores.depression,
-        anxiety_score: finalScores.anxiety,
-        stress_score: finalScores.stress,
+        depression_score,
+        anxiety_score,
+        stress_score,
       },
     });
   } catch (error) {
+    // Rollback transaksi jika ada error
     await transaction.rollback();
     console.error(error);
     res.status(500).json({ error: error.message });
