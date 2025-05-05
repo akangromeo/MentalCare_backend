@@ -1,4 +1,4 @@
-const { sequelize, Op } = require("../config/database");
+const sequelize = require("../config/database");
 const Dass42Question = require("../models/Dass42Question");
 const Dass42Response = require("../models/Dass42Response");
 const Dass42Result = require("../models/Dass42Result");
@@ -189,17 +189,17 @@ exports.submitTest = async (req, res) => {
 
     // 1. Optimized query to fetch questions and categories in one request
     const questionsWithCategories = await Dass42Question.findAll({
-      attributes: ["question_id", "category_id"], // Hanya ambil kolom yang diperlukan
+      attributes: ["question_id", "category_id"],
       include: [
         {
           model: Category,
           as: "category",
-          attributes: ["category_id"], // Hanya ambil category_id
+          attributes: ["category_id"],
           required: true,
         },
       ],
       where: {
-        question_id: { [Op.in]: responses.map((r) => r.question_id) },
+        question_id: responses.map((r) => r.question_id),
       },
       order: [["question_id", "ASC"]],
     });
@@ -212,7 +212,7 @@ exports.submitTest = async (req, res) => {
       return {
         result_id: result.result_id,
         question_id: response.question_id,
-        score: response.score, // Menggunakan nilai 0 jika tidak ditemukan
+        score: response.score,
       };
     });
 
@@ -235,13 +235,10 @@ exports.submitTest = async (req, res) => {
       const score = response.score;
 
       if (categoryId === 1) {
-        // 1 = Depresi
         depression_score += score;
       } else if (categoryId === 2) {
-        // 2 = Kecemasan
         anxiety_score += score;
       } else if (categoryId === 3) {
-        // 3 = Stres
         stress_score += score;
       }
     }
@@ -253,7 +250,12 @@ exports.submitTest = async (req, res) => {
         anxiety_score,
         stress_score,
       },
-      { transaction }
+      {
+        where: {
+          result_id: result.result_id,
+        },
+        transaction,
+      }
     );
 
     // 6. Commit the transaction

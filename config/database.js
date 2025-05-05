@@ -14,6 +14,4 @@ const sequelize = new Sequelize(
   }
 );
 
-const Op = Sequelize.Op;
-
-module.exports = { sequelize, Op };
+module.exports = sequelize;
