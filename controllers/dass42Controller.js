@@ -4,7 +4,6 @@ const Dass42Response = require("../models/Dass42Response");
 const Dass42Result = require("../models/Dass42Result");
 const Category = require("../models/Category");
 const moment = require("moment");
-const { Sequelize } = require("sequelize");
 
 // Mendapatkan daftar pertanyaan DASS-42
 exports.getQuestions = async (req, res) => {
