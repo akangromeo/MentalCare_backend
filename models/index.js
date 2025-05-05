@@ -20,7 +20,7 @@ User.hasOne(Profile, { foreignKey: "user_id" });
 Profile.belongsTo(User, { foreignKey: "user_id" }); // Relasi antara Profile dan User
 Profile.belongsTo(Gender, { foreignKey: "gender_id" }); // Relasi antara Profile dan Gender
 
-Dass42Question.belongsTo(Category, { foreignKey: "category_id" }); // Relasi antara Dass42Question dan Category
+Dass42Question.belongsTo(Category, { foreignKey: "category_id", as: "category" }); // Relasi antara Dass42Question dan Category
 
 // Relasi antara Dass42Response dan Dass42Question
 Dass42Response.belongsTo(Dass42Question, {
