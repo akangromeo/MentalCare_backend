@@ -190,12 +190,12 @@ exports.submitTest = async (req, res) => {
 
     // 1. Optimized query to fetch questions and categories in one request
     const questionsWithCategories = await db.Dass42Question.findAll({
-      attributes: ["question_id", "category_id"], // Only fetch the necessary columns
+      attributes: ["question_id", "category_id"], // Hanya ambil kolom yang diperlukan
       include: [
         {
           model: db.Category,
           as: "category",
-          attributes: ["category_id"], // Only fetch category_id
+          attributes: ["category_id"], // Hanya ambil category_id
           required: true,
         },
       ],
@@ -207,13 +207,13 @@ exports.submitTest = async (req, res) => {
 
     // 2. Prepare data for bulk insert of responses
     const responseBatch = responses.map((response) => {
-      const matchingResponse = responses.find(
-        (r) => r.question_id === response.question_id
-      ); // mencari response yang cocok
+      const matchingQuestion = questionsWithCategories.find(
+        (q) => q.question_id === response.question_id
+      );
       return {
         result_id: result.result_id,
         question_id: response.question_id,
-        score: matchingResponse ? matchingResponse.score : 0, // Menggunakan nilai 0 jika tidak ditemukan
+        score: response.score, // Menggunakan nilai 0 jika tidak ditemukan
       };
     });
 
