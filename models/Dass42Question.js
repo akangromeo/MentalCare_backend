@@ -34,11 +34,5 @@ const Dass42Question = sequelize.define(
   }
 );
 
-// Dass42Question.associate = function(models) {
-// 	Dass42Question.belongsTo(models.Category, {
-// 	  foreignKey: 'category_id',
-// 	  as: 'category',
-// 	});
-//   };
 
 module.exports = Dass42Question;

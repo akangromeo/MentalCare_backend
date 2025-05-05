@@ -20,10 +20,5 @@ const Category = sequelize.define(
   }
 );
 
-// Category.associate = function(models) {
-//   Category.hasMany(models.Dass42Question, {
-//     foreignKey: 'category_id',
-//   });
-// };
 
 module.exports = Category;
