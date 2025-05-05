@@ -164,7 +164,6 @@ exports.getCategory = async (req, res) => {
   }
 };
 
-// Mengumpulkan jawaban dan menyimpan hasil tes
 exports.submitTest = async (req, res) => {
   const { responses, psikolog_id } = req.body;
   const patient_id = req.user.user_id;
@@ -207,11 +206,16 @@ exports.submitTest = async (req, res) => {
     });
 
     // 2. Prepare data for bulk insert of responses
-    const responseBatch = responses.map((response) => ({
-      result_id: result.result_id,
-      question_id: response.question_id,
-      score: response.score,
-    }));
+    const responseBatch = responses.map((response) => {
+      const matchingResponse = responses.find(
+        (r) => r.question_id === response.question_id
+      ); // mencari response yang cocok
+      return {
+        result_id: result.result_id,
+        question_id: response.question_id,
+        score: matchingResponse ? matchingResponse.score : 0, // Menggunakan nilai 0 jika tidak ditemukan
+      };
+    });
 
     // 3. Bulk insert responses
     await db.Dass42Response.bulkCreate(responseBatch, { transaction });
