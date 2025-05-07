@@ -189,23 +189,16 @@ exports.submitTest = async (req, res) => {
       { transaction }
     );
 
-    // 1. Query yang dioptimalkan untuk mengambil pertanyaan dan kategori dalam satu permintaan
+    // 1. Optimized query to fetch questions, including category_id
     const questionsWithCategories = await Dass42Question.findAll({
-      attributes: ["question_id", "category_id"], // Hanya ambil kolom yang diperlukan
-      include: [
-        {
-          model: Category,
-          attributes: ["category_id"], // Hanya ambil category_id
-          required: true,
-        },
-      ],
+      attributes: ["question_id", "category_id"], // Fetch category_id
       where: {
         question_id: responses.map((r) => r.question_id),
       },
       order: [["question_id", "ASC"]],
     });
 
-    // 2. Siapkan data untuk bulk insert respons
+    // 2. Prepare data for bulk insert of responses
     const responseBatch = responses.map((response) => {
       const matchingQuestion = questionsWithCategories.find(
         (q) => q.question_id === response.question_id
@@ -213,19 +206,19 @@ exports.submitTest = async (req, res) => {
       return {
         result_id: result.result_id,
         question_id: response.question_id,
-        score: response.score, // Menggunakan nilai 0 jika tidak ditemukan
+        score: response.score,
       };
     });
 
-    // 3. Bulk insert respons
+    // 3. Bulk insert responses
     await Dass42Response.bulkCreate(responseBatch, { transaction });
 
-    // 4. Hitung skor secara efisien
+    // 4. Calculate scores efficiently
     let depression_score = 0;
     let anxiety_score = 0;
     let stress_score = 0;
 
-    // Buat map untuk pencarian kategori yang lebih cepat
+    // Create a map for faster category_id lookup
     const categoryMap = new Map();
     questionsWithCategories.forEach((question) => {
       categoryMap.set(question.question_id, question.category_id);
@@ -236,18 +229,15 @@ exports.submitTest = async (req, res) => {
       const score = response.score;
 
       if (categoryId === 1) {
-        // 1 = Depresi
         depression_score += score;
       } else if (categoryId === 2) {
-        // 2 = Kecemasan
         anxiety_score += score;
       } else if (categoryId === 3) {
-        // 3 = Stres
         stress_score += score;
       }
     }
 
-    // 5. Update hasil dengan skor yang dihitung
+    // 5. Update result with calculated scores
     await Dass42Result.update(
       {
         depression_score,
@@ -262,10 +252,10 @@ exports.submitTest = async (req, res) => {
       }
     );
 
-    // 6. Commit transaksi
+    // 6. Commit the transaction
     await transaction.commit();
 
-    // 7. Kirim respons
+    // 7. Send the response
     res.json({
       message: "Tes berhasil disubmit",
       result: {

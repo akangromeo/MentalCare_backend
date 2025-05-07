@@ -17,10 +17,6 @@ const Dass42Question = sequelize.define(
     category_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Category,
-        key: "category_id",
-      },
     },
     question_order: {
       type: DataTypes.INTEGER,
