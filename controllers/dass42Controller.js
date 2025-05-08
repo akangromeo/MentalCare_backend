@@ -177,6 +177,7 @@ exports.submitTest = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
+    // 1. Simpan hasil awal tes dengan skor 0
     const result = await Dass42Result.create(
       {
         patient_id,
@@ -189,42 +190,27 @@ exports.submitTest = async (req, res) => {
       { transaction }
     );
 
-    // 1. Optimized query to fetch questions, including category_id
+    // 2. Ambil semua pertanyaan beserta kategori_id-nya
     const questionsWithCategories = await Dass42Question.findAll({
-      attributes: ["question_id", "category_id"], // Fetch category_id
+      attributes: ["question_id", "category_id"],
       where: {
         question_id: responses.map((r) => r.question_id),
       },
       order: [["question_id", "ASC"]],
     });
 
-    // 2. Prepare data for bulk insert of responses
-    const responseBatch = responses.map((response) => {
-      const matchingQuestion = questionsWithCategories.find(
-        (q) => q.question_id === response.question_id
-      );
-      return {
-        result_id: result.result_id,
-        question_id: response.question_id,
-        score: response.score,
-      };
+    // 3. Buat peta (map) untuk lookup kategori_id berdasarkan question_id
+    const categoryMap = new Map();
+    questionsWithCategories.forEach((q) => {
+      categoryMap.set(q.question_id, q.category_id);
     });
 
-    // 3. Bulk insert responses
-    await Dass42Response.bulkCreate(responseBatch, { transaction });
-
-    // 4. Calculate scores efficiently
+    // 4. Siapkan data untuk bulk insert + perhitungan skor
     let depression_score = 0;
     let anxiety_score = 0;
     let stress_score = 0;
 
-    // Create a map for faster category_id lookup
-    const categoryMap = new Map();
-    questionsWithCategories.forEach((question) => {
-      categoryMap.set(question.question_id, question.category_id);
-    });
-
-    for (const response of responses) {
+    const responseBatch = responses.map((response) => {
       const categoryId = categoryMap.get(response.question_id);
       const score = response.score;
 
@@ -234,10 +220,23 @@ exports.submitTest = async (req, res) => {
         anxiety_score += score;
       } else if (categoryId === 3) {
         stress_score += score;
+      } else {
+        console.warn(
+          `Unknown category ID for question ID ${response.question_id}`
+        );
       }
-    }
 
-    // 5. Update result with calculated scores
+      return {
+        result_id: result.result_id,
+        question_id: response.question_id,
+        score: response.score,
+      };
+    });
+
+    // 5. Simpan semua respons sekaligus
+    await Dass42Response.bulkCreate(responseBatch, { transaction });
+
+    // 6. Update skor akhir pada hasil tes
     await Dass42Result.update(
       {
         depression_score,
@@ -245,19 +244,17 @@ exports.submitTest = async (req, res) => {
         stress_score,
       },
       {
-        where: {
-          result_id: result.result_id,
-        },
+        where: { result_id: result.result_id },
         transaction,
       }
     );
 
-    // 6. Commit the transaction
+    // 7. Commit transaksi
     await transaction.commit();
 
-    // 7. Send the response
+    // 8. Kirim respons sukses ke frontend
     res.json({
-      message: "Tes berhasil disubmit",
+      message: "Test submitted successfully",
       result: {
         result_id: result.result_id,
         depression_score,
@@ -266,10 +263,12 @@ exports.submitTest = async (req, res) => {
       },
     });
   } catch (error) {
-    // 8. Rollback transaksi jika terjadi kesalahan
+    // Rollback jika gagal
     await transaction.rollback();
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    console.error("Error saat submit test:", error);
+    res
+      .status(500)
+      .json({ error: "Terjadi kesalahan saat menyimpan hasil tes." });
   }
 };
 
