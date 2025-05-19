@@ -233,10 +233,10 @@ exports.submitTest = async (req, res) => {
       };
     });
 
-    // 5. Simpan semua respons sekaligus
+
     await Dass42Response.bulkCreate(responseBatch, { transaction });
 
-    // 6. Update skor akhir pada hasil tes
+
     await Dass42Result.update(
       {
         depression_score,
